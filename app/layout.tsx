@@ -3,6 +3,7 @@ import { Rubik } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/client/providers/theme-provider"
 import Nav from "@/components/client/nav/nav"
+import { Toaster } from "sonner"
 
 const rubik = Rubik({
   variable: "--font-rubik",
@@ -28,6 +29,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Toaster richColors />
           <Nav>{children}</Nav>
         </ThemeProvider>
       </body>
