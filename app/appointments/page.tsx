@@ -18,11 +18,18 @@ import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { z } from "zod"
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
+interface AppointmentsPageProps {
+  params?: {
+    num?: string
+  }
+  searchParams?: {
+    date?: string
+  }
+}
+export default async function Page({ searchParams }: AppointmentsPageProps) {
+  // Await in case searchParams is a promise.
+  const resolvedSearchParams = await Promise.resolve(searchParams)
+
   const session = await auth.api.getSession({
     headers: await headers(),
   })
@@ -36,7 +43,7 @@ export default async function Page({
       date: z.string().transform((date) => new Date(date)),
     })
     .parse({
-      date: searchParams.date || new Date().toISOString(),
+      date: resolvedSearchParams?.date || new Date().toISOString(),
     })
 
   return (
