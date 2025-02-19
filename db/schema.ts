@@ -99,7 +99,7 @@ export const patient = pgTable(
     lastName: text("last_name").notNull(),
     dateOfBirth: date("date_of_birth").notNull(),
     ssn: text("ssn").notNull(),
-    gender: genderEnum(),
+    gender: genderEnum().notNull(),
     phoneNumber: text("phone_number"),
     address: text("address"),
   },

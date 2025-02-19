@@ -12,6 +12,7 @@ import {
 import { CardContent } from "@/components/ui/card"
 import { Calendar, Clock } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import moment from "moment"
 
 const AppointmentsList = async ({
   session,
@@ -31,9 +32,9 @@ const AppointmentsList = async ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Patient</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Time</TableHead>
+              <TableHead>Patient</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Notes</TableHead>
             </TableRow>
@@ -41,14 +42,6 @@ const AppointmentsList = async ({
           <TableBody>
             {appointments.map((appointment) => (
               <TableRow key={appointment.id} className="hover:bg-muted/50">
-                <TableCell className="font-medium">
-                  <div className="flex flex-col">
-                    <span>{`${appointment.patient.firstName} ${appointment.patient.lastName}`}</span>
-                    <span className="text-xs text-muted-foreground">
-                      SSN: {appointment.patient.ssn}
-                    </span>
-                  </div>
-                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Calendar size={14} />
@@ -58,8 +51,24 @@ const AppointmentsList = async ({
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Clock size={14} />
-                    {new Date(appointment.startTime).toLocaleTimeString()} -
-                    {new Date(appointment.endTime).toLocaleTimeString()}
+                    {new Date(appointment.startTime).toLocaleTimeString()}
+                    {/* calculate length  */}
+                    <span className="text-xs text-muted-foreground">
+                      (
+                      {moment(appointment.endTime).diff(
+                        moment(appointment.startTime),
+                        "minutes"
+                      )}{" "}
+                      min)
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex flex-col">
+                    <span>{`${appointment.patient.firstName} ${appointment.patient.lastName}`}</span>
+                    <span className="text-xs text-muted-foreground">
+                      SSN: {appointment.patient.ssn}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>

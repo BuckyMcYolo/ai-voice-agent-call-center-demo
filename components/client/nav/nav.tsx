@@ -28,8 +28,9 @@ import { LogIn, LogOut, Settings, User } from "lucide-react"
 import { Laptop, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import React from "react"
+import { Alert } from "@/components/ui/alert"
 
 const UserAvatar = React.memo(({ user }: { user: any }) => {
   const getInitials = React.useCallback((name: string) => {
@@ -59,13 +60,14 @@ const Nav = ({ children }: { children: React.ReactNode }) => {
   const { setTheme, theme } = useTheme()
 
   const router = useRouter()
+  const pathname = usePathname()
 
   return (
     <SidebarProvider>
       <AppSideBar />
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2">
-          <div className="flex flex-1 items-center gap-2 px-3">
+        <header className="flex h-14 shrink-0 items-center gap-2 justify-between w-full">
+          <div className="flex flex-row items-center gap-2 px-3">
             <SidebarTrigger />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
@@ -76,7 +78,17 @@ const Nav = ({ children }: { children: React.ReactNode }) => {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-
+          {user &&
+          (pathname === "/appointments" || pathname === "/patients") ? (
+            <Alert className="flex w-fit items-center gap-2 p-3 mt-2 text-sm">
+              Call your AI assistant at{" "}
+              <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
+                {" "}
+                (555) 0123-4567{" "}
+              </code>{" "}
+              to schedule or cancel an appointment.
+            </Alert>
+          ) : null}
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 m-1">
               <UserAvatar user={user} />

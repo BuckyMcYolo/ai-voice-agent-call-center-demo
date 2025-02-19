@@ -3,19 +3,33 @@
 import db from "@/db"
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
+import { Ratelimit } from "@upstash/ratelimit"
+import { Redis } from "@upstash/redis"
+import { patient } from "@/db/schema"
 
-export const createAppointment = async ({
-  patientId,
-  date,
-  startTime,
-  endTime,
-  notes,
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, "60 s"),
+  analytics: true,
+  prefix: "call-center-demo",
+})
+
+export const createPatient = async ({
+  firstName,
+  lastName,
+  ssn,
+  phoneNumber,
+  address,
+  dateOfBirth,
+  gender,
 }: {
-  patientId: string
-  date: string
-  startTime: string
-  endTime: string
-  notes: string
+  firstName: string
+  lastName: string
+  ssn: string
+  phoneNumber?: string
+  address?: string
+  dateOfBirth: Date
+  gender: "male" | "female" | "other"
 }) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -24,15 +38,26 @@ export const createAppointment = async ({
     throw new Error("Unauthorized")
   }
 
-  const appointment = await db.query.appointment.create({
-    data: {
-      patientId,
-      date,
-      startTime,
-      endTime,
-      notes,
-    },
-  })
+  //rate limiter
+  const response = await ratelimit.limit(session.user.id)
 
-  return appointment
+  if (!response.success) {
+    throw new Error("Too many requests. Please try again later.")
+  }
+  try {
+    await db.insert(patient).values({
+      firstName,
+      lastName,
+      dateOfBirth: dateOfBirth.toISOString(),
+      ssn,
+      gender,
+      phoneNumber,
+      address,
+      userId: session.user.id,
+    })
+
+    return
+  } catch (error) {
+    throw new Error("Failed to create patient: " + error)
+  }
 }

@@ -1,5 +1,6 @@
 "use server"
 
+import { NewAppointmentDialog } from "@/components/client/appointments/new-appointment-dialog"
 import AppointmentsSkeleton from "@/components/server/appointments/appointment-skeleton"
 import AppointmentsList from "@/components/server/appointments/appointments-list"
 import { DatePicker } from "@/components/server/appointments/date-picker-with-searchparams"
@@ -52,9 +53,7 @@ export default async function Page({
               </div>
               <div className="flex items-center gap-4">
                 <DatePicker date={date} />
-                <Button endIcon={<PlusIcon size={12} />}>
-                  New Appointment
-                </Button>
+                <NewAppointmentDialog />
               </div>
             </div>
           </CardHeader>

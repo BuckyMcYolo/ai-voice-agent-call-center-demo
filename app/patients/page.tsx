@@ -1,5 +1,6 @@
 "use server"
 
+import { NewPatientDialog } from "@/components/client/patients/new-patient-dialog"
 import PatientsSkeleton from "@/components/server/patients/loading-skeleton"
 import PatientsList from "@/components/server/patients/patients-list"
 import { Button } from "@/components/ui/button"
@@ -34,7 +35,7 @@ export default async function page() {
                 <CardTitle>Patients</CardTitle>
                 <CardDescription>Manage your patient records</CardDescription>
               </div>
-              <Button endIcon={<PlusIcon size={16} />}>Add patient</Button>
+              <NewPatientDialog />
             </div>
           </CardHeader>
           <Suspense fallback={<PatientsSkeleton />}>

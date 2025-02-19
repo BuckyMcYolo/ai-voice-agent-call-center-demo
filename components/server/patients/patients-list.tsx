@@ -22,14 +22,17 @@ const PatientsList = async ({
 
   return (
     <CardContent>
-      <ScrollArea className="h-[calc(100vh-12rem)] w-full rounded-md border">
+      <ScrollArea
+        className="h-[calc(100vh-12rem)] pr-2 w-full rounded-md border"
+        type="auto"
+      >
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Date of Birth</TableHead>
               <TableHead>Gender</TableHead>
-              <TableHead>Contact</TableHead>
+              <TableHead>Phone #</TableHead>
               <TableHead>Address</TableHead>
             </TableRow>
           </TableHeader>
@@ -55,7 +58,6 @@ const PatientsList = async ({
                 <TableCell>
                   {patient.phoneNumber && (
                     <div className="flex items-center gap-1 text-sm">
-                      <Phone size={14} />
                       {patient.phoneNumber}
                     </div>
                   )}

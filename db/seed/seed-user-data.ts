@@ -26,7 +26,7 @@ export async function seedUserData({
     { seed: new Date().getTime() }
   ).refine((f) => ({
     patient: {
-      count: 10,
+      count: 25,
       columns: {
         id: f.uuid(),
         createdAt: f.date({
@@ -61,10 +61,9 @@ export async function seedUserData({
       },
       with: {
         appointment: [
-          { weight: 0.4, count: [1, 2] }, // 40% chance of 1-2 appointments
-          { weight: 0.3, count: [3, 4] }, // 30% chance of 3-4 appointments
-          { weight: 0.2, count: [5, 6] }, // 20% chance of 5-6 appointments
-          { weight: 0.1, count: [7, 8, 9, 10] }, // 10% chance of 7-10 appointments
+          { weight: 0.5, count: [1] }, // 50% chance of 1 appointment
+          { weight: 0.4, count: [2] }, // 40% chance of 2 appointments
+          { weight: 0.1, count: [3] }, // 10% chance of 3 appointments
         ],
       },
     },
