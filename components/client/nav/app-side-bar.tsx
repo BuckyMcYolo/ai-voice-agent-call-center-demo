@@ -20,6 +20,12 @@ import {
 import { usePathname } from "next/navigation"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
+import { FaGithub } from "react-icons/fa"
+import { BsTwitterX } from "react-icons/bs"
+import { FaMeta } from "react-icons/fa6"
+import { FaLinkedin } from "react-icons/fa"
 
 const AppSideBar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const pathname = usePathname()
@@ -91,11 +97,23 @@ const AppSideBar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
       </SidebarHeader>
       <SidebarContent className="pt-2">
         <NavMain items={data.navMain} />
-        {/* <Button size={"sm"} variant={"outline"} className="mx-2 bg-transparent">
-          Create new Note
-        </Button> */}
 
         <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <Separator />
+        <div className="flex justify-center gap-2 pb-1">
+          <Button size={"icon"} variant={"ghost"}>
+            <FaLinkedin size={20} />
+          </Button>
+          <Button size={"icon"} variant={"ghost"}>
+            <BsTwitterX size={20} />
+          </Button>
+          <Button size={"icon"} variant={"ghost"}>
+            <FaMeta size={20} />
+          </Button>
+          <Button size={"icon"} variant={"ghost"}>
+            <FaGithub size={20} />
+          </Button>
+        </div>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

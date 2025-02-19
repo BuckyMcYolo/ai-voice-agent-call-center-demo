@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { auth } from "@/lib/auth"
-import { Phone, Plus, Sparkles } from "lucide-react"
+import { Globe, Phone, Plus, Sparkles } from "lucide-react"
 import { headers } from "next/headers"
 import Image from "next/image"
 import Link from "next/link"
@@ -51,7 +51,7 @@ export default async function Home() {
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <Link
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href={!session ? "/sign-up" : "/appointments"}
+            href={!session ? "/sign-in" : "/appointments"}
             rel="noopener noreferrer"
           >
             {!session ? (
@@ -79,7 +79,7 @@ export default async function Home() {
           href="/features"
           rel="noopener noreferrer"
         >
-          <Sparkles className="h-4 w-4" />
+          <Sparkles className="h-4 w-4 text-muted-foreground" />
           Features
         </a>
         <a
@@ -87,7 +87,7 @@ export default async function Home() {
           href="/sample-calls"
           rel="noopener noreferrer"
         >
-          <Phone className="h-4 w-4" />
+          <Phone className="h-4 w-4 text-muted-foreground" />
           Sample Calls
         </a>
         <a
@@ -96,13 +96,7 @@ export default async function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
+          <Globe className="h-4 w-4 text-muted-foreground" />
           Back to Axon AI site
         </a>
       </footer>

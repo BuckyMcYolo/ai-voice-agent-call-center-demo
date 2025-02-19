@@ -1,25 +1,17 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import { MoveLeft } from "lucide-react"
+import Link from "next/link"
+import { useState } from "react"
 
 export default function SignInGoogle() {
+  const [loading, setLoading] = useState(false)
   return (
     <Card className="max-w-md border-0">
-      {/* <CardHeader>
-        <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
-        <CardDescription className="text-xs md:text-sm">
-          Enter your email below to login to your account
-        </CardDescription>
-      </CardHeader> */}
       <CardContent className="p-4">
         <div className="grid gap-4">
           <div
@@ -32,11 +24,20 @@ export default function SignInGoogle() {
               variant="outline"
               className={cn("w-full gap-2")}
               onClick={async () => {
-                await authClient.signIn.social({
-                  provider: "google",
-                  callbackURL: "/",
-                })
+                setLoading(true)
+                await authClient.signIn.social(
+                  {
+                    provider: "google",
+                    callbackURL: "/",
+                  },
+                  {
+                    onResponse: () => {
+                      setLoading(false)
+                    },
+                  }
+                )
               }}
+              loading={loading}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -64,6 +65,11 @@ export default function SignInGoogle() {
               Sign in with Google
             </Button>
           </div>
+          <Link href="/">
+            <Button variant={"ghost"} startIcon={<MoveLeft size={20} />}>
+              Go Back
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

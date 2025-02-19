@@ -1,4 +1,13 @@
-import { pgTable, text, integer, timestamp, boolean } from "drizzle-orm/pg-core"
+import { relations } from "drizzle-orm"
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  pgEnum,
+  date,
+  uuid,
+} from "drizzle-orm/pg-core"
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -9,6 +18,12 @@ export const user = pgTable("user", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 })
+
+export const userRelations = relations(user, ({ one, many }) => ({
+  patient: many(patient),
+  account: many(account),
+  session: many(session),
+}))
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
@@ -22,6 +37,14 @@ export const session = pgTable("session", {
     .notNull()
     .references(() => user.id),
 })
+
+export const sessionRelations = relations(session, ({ one, many }) => ({
+  user: one(user, {
+    fields: [session.userId],
+    references: [user.id],
+    relationName: "user",
+  }),
+}))
 
 export const account = pgTable("account", {
   id: text("id").primaryKey(),
@@ -41,6 +64,14 @@ export const account = pgTable("account", {
   updatedAt: timestamp("updated_at").notNull(),
 })
 
+export const accountRelations = relations(account, ({ one, many }) => ({
+  user: one(user, {
+    fields: [account.userId],
+    references: [user.id],
+    relationName: "user",
+  }),
+}))
+
 export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
@@ -49,3 +80,64 @@ export const verification = pgTable("verification", {
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
 })
+
+export const genderEnum = pgEnum("gender", ["male", "female", "other"])
+
+export const patient = pgTable("patient", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  dateOfBirth: date("date_of_birth").notNull(),
+  ssn: text("ssn").notNull(),
+  gender: genderEnum(),
+  phoneNumber: text("phone_number"),
+  address: text("address"),
+})
+
+export type InsertPatient = typeof patient.$inferInsert
+export type SelectPatient = typeof patient.$inferSelect
+
+export const patientRelations = relations(patient, ({ one, many }) => ({
+  user: one(user, {
+    fields: [patient.userId],
+    references: [user.id],
+    relationName: "user",
+  }),
+}))
+
+export const statusEnum = pgEnum("status", [
+  "scheduled",
+  "completed",
+  "cancelled",
+  "in_progress",
+  "no_show",
+])
+
+export const appointment = pgTable("appointment", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  patientId: uuid("patient_id")
+    .notNull()
+    .references(() => patient.id),
+  status: statusEnum().notNull(),
+  date: date("date").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  length: text("length").notNull(),
+  notes: text("notes"),
+})
+
+export type InsertAppointment = typeof appointment.$inferInsert
+export type SelectAppointment = typeof appointment.$inferSelect
+
+export const appointmentRelations = relations(appointment, ({ one, many }) => ({
+  patient: one(patient, {
+    fields: [appointment.patientId],
+    references: [patient.id],
+    relationName: "patient",
+  }),
+}))
