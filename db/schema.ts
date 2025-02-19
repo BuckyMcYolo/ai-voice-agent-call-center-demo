@@ -7,6 +7,7 @@ import {
   pgEnum,
   date,
   uuid,
+  index,
 } from "drizzle-orm/pg-core"
 
 export const user = pgTable("user", {
@@ -18,6 +19,9 @@ export const user = pgTable("user", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 })
+
+export type InsertUser = typeof user.$inferInsert
+export type SelectUser = typeof user.$inferSelect
 
 export const userRelations = relations(user, ({ one, many }) => ({
   patient: many(patient),
@@ -83,20 +87,24 @@ export const verification = pgTable("verification", {
 
 export const genderEnum = pgEnum("gender", ["male", "female", "other"])
 
-export const patient = pgTable("patient", {
-  id: uuid("id").primaryKey().defaultRandom().notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id),
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
-  dateOfBirth: date("date_of_birth").notNull(),
-  ssn: text("ssn").notNull(),
-  gender: genderEnum(),
-  phoneNumber: text("phone_number"),
-  address: text("address"),
-})
+export const patient = pgTable(
+  "patient",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id),
+    firstName: text("first_name").notNull(),
+    lastName: text("last_name").notNull(),
+    dateOfBirth: date("date_of_birth").notNull(),
+    ssn: text("ssn").notNull(),
+    gender: genderEnum(),
+    phoneNumber: text("phone_number"),
+    address: text("address"),
+  },
+  (table) => [index("patient_user_id_index").on(table.userId)]
+)
 
 export type InsertPatient = typeof patient.$inferInsert
 export type SelectPatient = typeof patient.$inferSelect
@@ -127,7 +135,6 @@ export const appointment = pgTable("appointment", {
   date: date("date").notNull(),
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
-  length: text("length").notNull(),
   notes: text("notes"),
 })
 
