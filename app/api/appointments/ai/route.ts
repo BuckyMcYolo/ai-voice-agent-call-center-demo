@@ -167,8 +167,8 @@ export async function GET(req: Request) {
                   "h:mm A"
                 )} - ${slotEnd.format("h:mm A")}`,
                 timezone: "America/Chicago", // Explicitly include timezone information
-                userId: userId,
-                patientId: patientId,
+                // userId: userId,
+                // patientId: patientId,
               })
             }
           }

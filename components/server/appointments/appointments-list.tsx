@@ -53,7 +53,7 @@ const AppointmentsList = async ({
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Calendar size={14} />
-                    {new Date(appointment.date).toLocaleDateString()}
+                    {moment(appointment.date).format("MM-DD-YYYY")}
                   </div>
                 </TableCell>
                 <TableCell>
