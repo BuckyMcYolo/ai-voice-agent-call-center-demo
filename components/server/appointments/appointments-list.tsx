@@ -13,6 +13,12 @@ import { CardContent } from "@/components/ui/card"
 import { Calendar, Clock } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import moment from "moment"
+import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const AppointmentsList = async ({
   session,
@@ -33,10 +39,12 @@ const AppointmentsList = async ({
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Time</TableHead>
               <TableHead>Patient</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Date of Birth</TableHead>
               <TableHead>Notes</TableHead>
+              <TableHead>Id</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -47,6 +55,20 @@ const AppointmentsList = async ({
                     <Calendar size={14} />
                     {new Date(appointment.date).toLocaleDateString()}
                   </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      appointment.status === "scheduled"
+                        ? "outline"
+                        : appointment.status === "cancelled"
+                        ? "destructive"
+                        : "secondary"
+                    }
+                    className="capitalize"
+                  >
+                    {appointment.status}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
@@ -72,9 +94,25 @@ const AppointmentsList = async ({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className="capitalize">{appointment.status}</span>
+                  {moment(appointment.patient.dateOfBirth).format("MM-DD-YYYY")}{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({moment().diff(appointment.patient.dateOfBirth, "years")}{" "}
+                    yo)
+                  </span>
                 </TableCell>
-                <TableCell>{appointment.notes || "No notes"}</TableCell>
+                <TableCell className="max-w-[200px]">
+                  <Tooltip>
+                    <TooltipTrigger className="w-full">
+                      <p className="truncate text-left">
+                        {appointment.notes || "No notes"}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="p-2 rounded-md shadow-lg max-w-96">
+                      {appointment.notes || "-"}
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>{appointment.id}</TableCell>
               </TableRow>
             ))}
             {appointments.length === 0 && (

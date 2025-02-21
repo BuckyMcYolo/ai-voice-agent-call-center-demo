@@ -23,12 +23,15 @@ export async function GET(req: Request) {
     const apiKey = headers_.get("Authorization")
     let apiKeyValue: string | null = null
 
-    //strip the Bearer prefix
     if (apiKey?.startsWith("Bearer ")) {
       apiKeyValue = apiKey.slice(7)
     }
 
     if (!apiKey) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    if (apiKeyValue !== process.env.AVA_API_KEY) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -45,31 +48,38 @@ export async function GET(req: Request) {
     const dob = searchParams.get("dob")
     const last4SSN = searchParams.get("last4SSN")
 
+    const fullName = patientName?.split(" ") || []
+    const firstName = fullName[0]
+    const lastName = fullName[1]
+
     if (!patientName || !dob) {
       return NextResponse.json([])
     }
 
-    // Format the date of birth correctly
     const formattedDob = moment(dob).format("YYYY-MM-DD")
 
-    // Query to get patients with their appointments
     const result = await db.query.patient.findFirst({
       where: and(
         or(
           ilike(patient.firstName, `%${patientName}%`),
-          ilike(patient.lastName, `%${patientName}%`)
+          ilike(patient.lastName, `%${patientName}%`),
+          and(eq(patient.firstName, firstName), eq(patient.lastName, lastName))
         ),
         or(
           eq(patient.dateOfBirth, formattedDob),
-          // Use the LIKE operator with proper pattern for the last 4 digits of SSN
           last4SSN ? sql`${patient.ssn} LIKE ${"%" + last4SSN}` : undefined
         )
       ),
-      // Include related appointments
       with: {
         appointments: true,
       },
     })
+
+    console.log("Searching patients for query:", patientName, dob, last4SSN)
+
+    if (!result) {
+      return NextResponse.json([])
+    }
 
     return NextResponse.json(result)
   } catch (error) {

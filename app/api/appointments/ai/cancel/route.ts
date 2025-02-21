@@ -73,7 +73,10 @@ export async function POST(req: Request) {
     // Verify that the appointment belongs to the patient making the request
     if (existingAppointment.patient.id !== patientId) {
       return NextResponse.json(
-        { error: "Unauthorized: You can only cancel your own appointments" },
+        {
+          error:
+            "Unauthorized: This appointment does not belong to the given patient",
+        },
         { status: 403 }
       )
     }

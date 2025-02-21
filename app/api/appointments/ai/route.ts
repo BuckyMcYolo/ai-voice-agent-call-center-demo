@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { appointment, patient } from "@/db/schema"
 import { NextResponse } from "next/server"
-import { eq, and, or, ilike, sql, not } from "drizzle-orm"
+import { eq, and, or, ilike, sql, not, inArray } from "drizzle-orm"
 import db from "@/db"
 import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
@@ -33,14 +33,33 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const startDateParam = searchParams.get("startDate")
     const endDateParam = searchParams.get("endDate")
+    const patientId = searchParams.get("patientId")
 
     // Validate required query parameters
-    if (!startDateParam || !endDateParam) {
+    if (!startDateParam || !endDateParam || !patientId) {
       return NextResponse.json(
-        { error: "Missing required parameters: startDate and endDate" },
+        {
+          error:
+            "Missing required parameters: startDate, endDate, and patientId",
+        },
         { status: 400 }
       )
     }
+
+    // First, find the specific patient
+    const specificPatient = await db.query.patient.findFirst({
+      where: eq(patient.id, patientId),
+      with: {
+        user: true, // Include the associated user data
+      },
+    })
+
+    if (!specificPatient) {
+      return NextResponse.json({ error: "Patient not found" }, { status: 404 })
+    }
+
+    // Get the user ID that the patient belongs to
+    const userId = specificPatient.userId
 
     // Parse dates and validate
     const startDate = moment(startDateParam).startOf("day")
@@ -69,12 +88,21 @@ export async function GET(req: Request) {
       )
     }
 
-    // Get all booked appointments within the date range
+    // Get all patients under the same user to find all their appointments
+    const userPatients = await db.query.patient.findMany({
+      where: eq(patient.userId, userId),
+    })
+
+    const patientIds = userPatients.map((p) => p.id)
+    // Get all booked appointments for patients under this user within the date range
     const bookedAppointments = await db.query.appointment.findMany({
       where: and(
         sql`${appointment.date} >= ${startDate.format("YYYY-MM-DD")}`,
         sql`${appointment.date} <= ${endDate.format("YYYY-MM-DD")}`,
-        not(eq(appointment.status, "cancelled"))
+        not(eq(appointment.status, "cancelled")),
+        patientIds.length > 0
+          ? inArray(appointment.patientId, patientIds)
+          : undefined
       ),
     })
 

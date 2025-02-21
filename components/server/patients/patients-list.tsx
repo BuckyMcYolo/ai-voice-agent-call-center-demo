@@ -34,6 +34,7 @@ const PatientsList = async ({
               <TableHead>Gender</TableHead>
               <TableHead>Phone #</TableHead>
               <TableHead>Address</TableHead>
+              <TableHead>Id</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -70,6 +71,7 @@ const PatientsList = async ({
                     </div>
                   )}
                 </TableCell>
+                <TableCell>{patient.id}</TableCell>
               </TableRow>
             ))}
             {patients.length === 0 && (
