@@ -42,7 +42,7 @@ export default async function Home() {
           <li className="mb-2">
             Call our AI assistant at{" "}
             <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              (555) 0123-4567
+              (662) 584-4415
             </code>
           </li>
           <li>Try scheduling or canceling an appointment as a test patient</li>

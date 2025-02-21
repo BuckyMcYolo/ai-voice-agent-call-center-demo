@@ -8,7 +8,6 @@ import { Redis } from "@upstash/redis"
 import { headers } from "next/headers"
 import moment from "moment"
 
-// get a list of appointments from within a certain time range
 // Get a list of available appointment slots within a certain time range
 export async function GET(req: Request) {
   const headers_ = await headers()
