@@ -115,6 +115,7 @@ export const patientRelations = relations(patient, ({ one, many }) => ({
     references: [user.id],
     relationName: "user",
   }),
+  appointments: many(appointment),
 }))
 
 export const statusEnum = pgEnum("status", [
