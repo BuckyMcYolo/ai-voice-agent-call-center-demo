@@ -6,7 +6,7 @@ import db from "@/db"
 import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
 import { headers } from "next/headers"
-import moment from "moment"
+import moment from "moment-timezone" // Use moment-timezone for better timezone handling
 
 // Get a list of available appointment slots within a certain time range
 export async function GET(req: Request) {
@@ -34,6 +34,9 @@ export async function GET(req: Request) {
     const endDateParam = searchParams.get("endDate")
     const patientId = searchParams.get("patientId")
 
+    // Define timezone constant - this ensures consistent timezone usage throughout
+    const TIMEZONE = "America/Chicago"
+
     // Validate required query parameters
     if (!startDateParam || !endDateParam || !patientId) {
       return NextResponse.json(
@@ -60,9 +63,9 @@ export async function GET(req: Request) {
     // Get the user ID that the patient belongs to
     const userId = specificPatient.userId
 
-    // Parse dates and validate
-    const startDate = moment(startDateParam).startOf("day")
-    const endDate = moment(endDateParam).endOf("day")
+    // Parse dates and validate - ensure they're interpreted in the CST timezone
+    const startDate = moment.tz(startDateParam, TIMEZONE).startOf("day")
+    const endDate = moment.tz(endDateParam, TIMEZONE).endOf("day")
 
     if (!startDate.isValid() || !endDate.isValid()) {
       return NextResponse.json(
@@ -93,11 +96,16 @@ export async function GET(req: Request) {
     })
 
     const patientIds = userPatients.map((p) => p.id)
+
+    // Format dates for database query - using UTC in the database
+    const startDateStr = startDate.utc().format("YYYY-MM-DD")
+    const endDateStr = endDate.utc().format("YYYY-MM-DD")
+
     // Get all booked appointments for patients under this user within the date range
     const bookedAppointments = await db.query.appointment.findMany({
       where: and(
-        sql`${appointment.date} >= ${startDate.format("YYYY-MM-DD")}`,
-        sql`${appointment.date} <= ${endDate.format("YYYY-MM-DD")}`,
+        sql`${appointment.date} >= ${startDateStr}`,
+        sql`${appointment.date} <= ${endDateStr}`,
         not(eq(appointment.status, "cancelled")),
         patientIds.length > 0
           ? inArray(appointment.patientId, patientIds)
@@ -105,7 +113,7 @@ export async function GET(req: Request) {
       ),
     })
 
-    // Business hours configuration (8AM to 5PM)
+    // Business hours configuration (8AM to 5PM CST)
     const businessHourStart = 8
     const businessHourEnd = 17
     const appointmentDurationMinutes = 30
@@ -114,6 +122,7 @@ export async function GET(req: Request) {
     // Generate all possible slots
     const availableSlots = []
     const currentDate = startDate.clone()
+    const now = moment.tz(TIMEZONE) // Current time in CST
 
     while (currentDate.isSameOrBefore(endDate, "day")) {
       // Skip weekends (Saturday and Sunday)
@@ -122,19 +131,22 @@ export async function GET(req: Request) {
           // For each hour, we can have up to maxSlotsPerHour slots
           for (let slotIndex = 0; slotIndex < maxSlotsPerHour; slotIndex++) {
             const slotMinutes = slotIndex * (60 / maxSlotsPerHour)
-            const slotStart = currentDate
-              .clone()
+
+            // Create slot times in CST
+            const slotStart = moment
+              .tz(currentDate.format("YYYY-MM-DD"), TIMEZONE)
               .hour(hour)
               .minute(slotMinutes)
               .second(0)
+
             const slotEnd = slotStart
               .clone()
               .add(appointmentDurationMinutes, "minutes")
 
-            // Check if this slot is already booked
+            // Check if this slot is already booked - convert db times to CST for comparison
             const isBooked = bookedAppointments.some((appt) => {
-              const apptStart = moment(appt.startTime)
-              const apptEnd = moment(appt.endTime)
+              const apptStart = moment.tz(appt.startTime, TIMEZONE)
+              const apptEnd = moment.tz(appt.endTime, TIMEZONE)
 
               return (
                 apptStart.isSame(slotStart) ||
@@ -143,25 +155,20 @@ export async function GET(req: Request) {
               )
             })
 
-            // Skip slots in the past
-            const isPast = slotStart.isBefore(moment())
+            // Skip slots in the past (comparing in CST)
+            const isPast = slotStart.isBefore(now)
 
             if (!isBooked && !isPast) {
               availableSlots.push({
-                date: slotStart
-                  .utcOffset("America/Chicago")
-                  .format("YYYY-MM-DD"),
-                startTime: slotStart
-                  .utcOffset("America/Chicago")
-                  .format("YYYY-MM-DDTHH:mm:ss"),
-                endTime: slotEnd
-                  .utcOffset("America/Chicago")
-                  .format("YYYY-MM-DDTHH:mm:ss"),
-                formattedTime: `${slotStart
-                  .utcOffset("America/Chicago")
-                  .format("h:mm A")} - ${slotEnd
-                  .utcOffset("America/Chicago")
-                  .format("h:mm A")}`,
+                date: slotStart.format("YYYY-MM-DD"),
+                startTime: slotStart.format("YYYY-MM-DDTHH:mm:ss"),
+                endTime: slotEnd.format("YYYY-MM-DDTHH:mm:ss"),
+                formattedTime: `${slotStart.format(
+                  "h:mm A"
+                )} - ${slotEnd.format("h:mm A")}`,
+                timezone: "America/Chicago", // Explicitly include timezone information
+                userId: userId,
+                patientId: patientId,
               })
             }
           }
@@ -173,8 +180,10 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({
-      startDate: startDate.utcOffset("America/Chicago").format("YYYY-MM-DD"),
-      endDate: endDate.utcOffset("America/Chicago").format("YYYY-MM-DD"),
+      startDate: startDate.format("YYYY-MM-DD"),
+      endDate: endDate.format("YYYY-MM-DD"),
+      timezone: TIMEZONE,
+      patientName: `${specificPatient.firstName} ${specificPatient.lastName}`,
       availableSlots,
     })
   } catch (error) {

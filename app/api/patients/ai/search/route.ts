@@ -2,12 +2,12 @@
 import { auth } from "@/lib/auth"
 import { patient, appointment } from "@/db/schema"
 import { NextResponse } from "next/server"
-import { eq, and, or, ilike, sql } from "drizzle-orm"
+import { eq, and, or, ilike, sql, not, asc } from "drizzle-orm"
 import db from "@/db"
 import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
 import { headers } from "next/headers"
-import moment from "moment"
+import moment from "moment-timezone" // Use moment-timezone for better timezone handling
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -35,8 +35,10 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // const response = await ratelimit.limit(session.user.id)
+    // Define timezone constant
+    const TIMEZONE = "America/Chicago"
 
+    // const response = await ratelimit.limit(session.user.id)
     // if (!response.success) {
     //   return new NextResponse("Too many requests. Please try again later.", {
     //     status: 429,
@@ -48,22 +50,38 @@ export async function GET(req: Request) {
     const dob = searchParams.get("dob")
     const last4SSN = searchParams.get("last4SSN")
 
-    const fullName = patientName?.split(" ") || []
-    const firstName = fullName[0]
-    const lastName = fullName[1]
-
     if (!patientName || !dob) {
       return NextResponse.json([])
     }
 
-    const formattedDob = moment(dob).format("YYYY-MM-DD")
+    // Handle both full name and partial name searches properly
+    const fullName = patientName.split(" ").filter(Boolean)
+    const firstName = fullName[0] || ""
+    const lastName = fullName.length > 1 ? fullName[fullName.length - 1] : ""
+
+    // Format date of birth in YYYY-MM-DD format for database query
+    const formattedDob = moment.tz(dob, TIMEZONE).format("YYYY-MM-DD")
+
+    console.log(
+      "Searching patients for query:",
+      patientName,
+      formattedDob,
+      last4SSN
+    )
 
     const result = await db.query.patient.findFirst({
       where: and(
         or(
           ilike(patient.firstName, `%${patientName}%`),
           ilike(patient.lastName, `%${patientName}%`),
-          and(eq(patient.firstName, firstName), eq(patient.lastName, lastName))
+          and(
+            fullName.length > 1
+              ? and(
+                  ilike(patient.firstName, `%${firstName}%`),
+                  ilike(patient.lastName, `%${lastName}%`)
+                )
+              : undefined
+          )
         ),
         or(
           eq(patient.dateOfBirth, formattedDob),
@@ -71,28 +89,48 @@ export async function GET(req: Request) {
         )
       ),
       with: {
-        appointments: true,
+        appointments: {
+          // Only include non-cancelled appointments
+          where: not(eq(appointment.status, "cancelled")),
+          // Order by date and start time for better presentation
+          orderBy: [asc(appointment.date), asc(appointment.startTime)],
+        },
       },
     })
 
-    console.log("Searching patients for query:", patientName, dob, last4SSN)
-
     if (!result) {
+      console.log("No patient found matching criteria")
       return NextResponse.json([])
     }
 
+    // Normalize appointment times to CST and format consistently
     const normalizedData = {
       ...result,
-      appointments: result.appointments.map((appointment) => ({
-        ...appointment,
-        startTime: moment(appointment.startTime)
-          .utcOffset("America/Chicago")
-          .format("HH:mm"),
-        endTime: moment(appointment.endTime)
-          .utcOffset("America/Chicago")
-          .format("HH:mm"),
-        date: moment(appointment.date).format("YYYY-MM-DD"),
-      })),
+      appointments: result.appointments.map((appt) => {
+        // Create moment objects in the CST timezone
+        const startTime = moment.tz(appt.startTime, TIMEZONE)
+        const endTime = moment.tz(appt.endTime, TIMEZONE)
+        const appointmentDate = moment.tz(appt.date, TIMEZONE)
+
+        // Format data for display
+        return {
+          ...appt,
+          startTime: startTime.format("HH:mm"),
+          endTime: endTime.format("HH:mm"),
+          date: appointmentDate.format("YYYY-MM-DD"),
+          formattedDate: appointmentDate.format("MMM D, YYYY"),
+          formattedTime: `${startTime.format("h:mm A")} - ${endTime.format(
+            "h:mm A"
+          )}`,
+          timezone: TIMEZONE,
+        }
+      }),
+      // Include masked SSN for verification (only show last 4 digits)
+      maskedSSN: result.ssn ? `xxx-xx-${result.ssn.slice(-4)}` : null,
+      // Format DOB for display
+      formattedDOB: moment
+        .tz(result.dateOfBirth, TIMEZONE)
+        .format("MMM D, YYYY"),
     }
 
     return NextResponse.json(normalizedData)
