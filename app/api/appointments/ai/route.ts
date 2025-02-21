@@ -148,12 +148,20 @@ export async function GET(req: Request) {
 
             if (!isBooked && !isPast) {
               availableSlots.push({
-                date: slotStart.format("YYYY-MM-DD"),
-                startTime: slotStart.format("YYYY-MM-DDTHH:mm:ss"),
-                endTime: slotEnd.format("YYYY-MM-DDTHH:mm:ss"),
-                formattedTime: `${slotStart.format(
-                  "h:mm A"
-                )} - ${slotEnd.format("h:mm A")}`,
+                date: slotStart
+                  .utcOffset("America/Chicago")
+                  .format("YYYY-MM-DD"),
+                startTime: slotStart
+                  .utcOffset("America/Chicago")
+                  .format("YYYY-MM-DDTHH:mm:ss"),
+                endTime: slotEnd
+                  .utcOffset("America/Chicago")
+                  .format("YYYY-MM-DDTHH:mm:ss"),
+                formattedTime: `${slotStart
+                  .utcOffset("America/Chicago")
+                  .format("h:mm A")} - ${slotEnd
+                  .utcOffset("America/Chicago")
+                  .format("h:mm A")}`,
               })
             }
           }
@@ -165,8 +173,8 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({
-      startDate: startDate.format("YYYY-MM-DD"),
-      endDate: endDate.format("YYYY-MM-DD"),
+      startDate: startDate.utcOffset("America/Chicago").format("YYYY-MM-DD"),
+      endDate: endDate.utcOffset("America/Chicago").format("YYYY-MM-DD"),
       availableSlots,
     })
   } catch (error) {

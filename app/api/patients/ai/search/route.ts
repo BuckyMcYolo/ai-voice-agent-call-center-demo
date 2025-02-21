@@ -81,7 +81,21 @@ export async function GET(req: Request) {
       return NextResponse.json([])
     }
 
-    return NextResponse.json(result)
+    const normalizedData = {
+      ...result,
+      appointments: result.appointments.map((appointment) => ({
+        ...appointment,
+        startTime: moment(appointment.startTime)
+          .utcOffset("America/Chicago")
+          .format("HH:mm"),
+        endTime: moment(appointment.endTime)
+          .utcOffset("America/Chicago")
+          .format("HH:mm"),
+        date: moment(appointment.date).format("YYYY-MM-DD"),
+      })),
+    }
+
+    return NextResponse.json(normalizedData)
   } catch (error) {
     console.error("Error searching patients:", error)
     return new NextResponse("Internal server error", { status: 500 })
