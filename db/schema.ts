@@ -18,6 +18,8 @@ export const user = pgTable("user", {
   image: text("image"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
+  // do not show appointments till they have been updated
+  hasUpdatedAppointments: boolean("has_updated_appointments").notNull(),
 })
 
 export type InsertUser = typeof user.$inferInsert

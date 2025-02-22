@@ -1,6 +1,7 @@
 "use server"
 
 import { NewPatientDialog } from "@/components/client/patients/new-patient-dialog"
+import Refresher from "@/components/client/refresher"
 import PatientsSkeleton from "@/components/server/patients/loading-skeleton"
 import PatientsList from "@/components/server/patients/patients-list"
 import { Button } from "@/components/ui/button"
@@ -23,6 +24,10 @@ export default async function page() {
 
   if (!session) {
     redirect("/sign-in")
+  }
+
+  if (session.user.hasUpdatedAppointments === false) {
+    return <Refresher />
   }
 
   return (

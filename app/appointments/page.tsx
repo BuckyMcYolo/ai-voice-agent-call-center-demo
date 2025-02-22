@@ -1,12 +1,14 @@
 "use server"
 
 import { NewAppointmentDialog } from "@/components/client/appointments/new-appointment-dialog"
+import Refresher from "@/components/client/refresher"
 import AppointmentsSkeleton from "@/components/server/appointments/appointment-skeleton"
 import AppointmentsList from "@/components/server/appointments/appointments-list"
 import { DatePicker } from "@/components/server/appointments/date-picker-with-searchparams"
 import { Button } from "@/components/ui/button"
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -29,6 +31,10 @@ export default async function Page({
 
   if (!session) {
     redirect("/sign-in")
+  }
+
+  if (session.user.hasUpdatedAppointments === false) {
+    return <Refresher />
   }
 
   const { date } = z

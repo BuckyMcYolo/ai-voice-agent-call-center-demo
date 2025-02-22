@@ -64,7 +64,7 @@ export default function Features() {
                       Call the AI Receptionist
                     </h3>
                     <p className="text-neutral-600 dark:text-neutral-300">
-                      Dial (555) 0123-4567 to interact with our AI. You&apos;ll
+                      Dial (662) 584-4415 to interact with our AI. You&apos;ll
                       need to authenticate using a test patient&apos;s
                       information to access their data.
                     </p>
@@ -122,7 +122,7 @@ export default function Features() {
           {/* CTA Section */}
           <section className="text-center">
             <a
-              href="/signup"
+              href="/sign-in"
               className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full transition-colors"
             >
               Start Testing Now

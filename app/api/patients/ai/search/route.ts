@@ -91,8 +91,7 @@ export async function GET(req: Request) {
       with: {
         appointments: {
           // Only include non-cancelled appointments
-          where: not(eq(appointment.status, "cancelled")),
-          // Order by date and start time for better presentation
+          // where: not(eq(appointment.status, "cancelled")),
           orderBy: [asc(appointment.date), asc(appointment.startTime)],
         },
       },
@@ -123,6 +122,7 @@ export async function GET(req: Request) {
             "h:mm A"
           )}`,
           timezone: TIMEZONE,
+          notes: null, // Hide internal notes for privacy
         }
       }),
       // Include masked SSN for verification (only show last 4 digits)

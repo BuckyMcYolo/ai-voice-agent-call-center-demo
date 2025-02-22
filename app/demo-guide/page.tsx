@@ -16,9 +16,9 @@ export default function DemoGuide() {
     <div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="max-w-4xl mx-auto">
         <div className="mb-12">
-          <h1 className="text-3xl font-bold mb-4">Demo Guide & Examples</h1>
+          <h1 className="text-3xl font-bold mb-4">Demo Guide</h1>
           <p className="text-lg text-muted-foreground dark:text-neutral-300">
-            Detailed instructions and example scenarios to help you test the AI
+            Instructions and example scenarios to help you test the AI
             receptionist
           </p>
         </div>
@@ -27,15 +27,14 @@ export default function DemoGuide() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Demo Environment</AlertTitle>
           <AlertDescription>
-            All patient data is fictional and automatically generated. Feel free
-            to experiment!
+            This is a live demo environment. Use your real information to test
+            the system.
           </AlertDescription>
         </Alert>
 
         <Tabs defaultValue="scripts" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3">
             <TabsTrigger value="scripts">Example Scripts</TabsTrigger>
-            <TabsTrigger value="profiles">Sample Profiles</TabsTrigger>
             <TabsTrigger value="scenarios">Test Scenarios</TabsTrigger>
             <TabsTrigger value="troubleshooting">Troubleshooting</TabsTrigger>
           </TabsList>
@@ -43,9 +42,9 @@ export default function DemoGuide() {
           <TabsContent value="scripts" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Authentication Example</CardTitle>
+                <CardTitle>Getting Started</CardTitle>
                 <CardDescription>
-                  How to identify yourself to the AI
+                  How to interact with the AI receptionist
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -68,12 +67,11 @@ export default function DemoGuide() {
                     </div>
                     <div>
                       <p className="font-semibold">
-                        You: &quot;My name is Sarah Johnson, date of birth March
-                        15, 1985.&quot;
+                        You: &quot;My name is [Your Name], date of birth [Your
+                        DOB].&quot;
                       </p>
                       <p className="text-sm text-muted-foreground mt-2">
-                        Note: Use any of the sample patient profiles provided in
-                        your dashboard
+                        Use your actual information for authentication
                       </p>
                     </div>
                   </div>
@@ -96,7 +94,7 @@ export default function DemoGuide() {
                     </div>
                     <div>
                       <p className="font-semibold">
-                        You: &quot;I&apos;d like to schedule a follow-up
+                        You: &quot;I&apos;d like to schedule an
                         appointment.&quot;
                       </p>
                     </div>
@@ -127,53 +125,6 @@ export default function DemoGuide() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="profiles" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sample Patient Profiles</CardTitle>
-                <CardDescription>
-                  Pre-generated test patients you can use
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="border-b pb-4">
-                    <h3 className="font-semibold mb-2">Sarah Johnson</h3>
-                    <ul className="space-y-2 text-sm">
-                      <li>
-                        <span className="font-medium">DOB:</span> March 15, 1985
-                      </li>
-                      <li>
-                        <span className="font-medium">Next Appointment:</span>{" "}
-                        Check dashboard
-                      </li>
-                      <li>
-                        <span className="font-medium">Medications:</span>{" "}
-                        Lisinopril 10mg, Metformin 500mg
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="border-b pb-4">
-                    <h3 className="font-semibold mb-2">Michael Chen</h3>
-                    <ul className="space-y-2 text-sm">
-                      <li>
-                        <span className="font-medium">DOB:</span> July 22, 1990
-                      </li>
-                      <li>
-                        <span className="font-medium">Next Appointment:</span>{" "}
-                        Check dashboard
-                      </li>
-                      <li>
-                        <span className="font-medium">Medications:</span>{" "}
-                        Atorvastatin 20mg
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="scenarios" className="space-y-6">
             <Card>
               <CardHeader>
@@ -187,26 +138,24 @@ export default function DemoGuide() {
                 <div className="space-y-4">
                   <div className="rounded-lg bg-neutral-50 dark:bg-neutral-900 p-4">
                     <h3 className="font-semibold mb-2">
-                      Scenario 1: Cancel and Rebook
+                      Scenario 1: Schedule Management
                     </h3>
                     <ol className="list-decimal list-inside space-y-2 text-sm">
-                      <li>Call and authenticate as Sarah Johnson</li>
-                      <li>Cancel her upcoming appointment</li>
-                      <li>Schedule a new appointment for a different time</li>
-                      <li>Watch the dashboard update in real-time</li>
+                      <li>Call and authenticate with your information</li>
+                      <li>Schedule a new appointment</li>
+                      <li>Ask about available time slots</li>
+                      <li>Request appointment confirmation details</li>
                     </ol>
                   </div>
                   <div className="rounded-lg bg-neutral-50 dark:bg-neutral-900 p-4">
                     <h3 className="font-semibold mb-2">
-                      Scenario 2: Medication Review
+                      Scenario 2: General Inquiries
                     </h3>
                     <ol className="list-decimal list-inside space-y-2 text-sm">
-                      <li>Call and authenticate as Michael Chen</li>
-                      <li>Ask about current medications</li>
-                      <li>
-                        Request information about last prescription refill
-                      </li>
-                      <li>Ask about potential side effects</li>
+                      <li>Ask about office hours</li>
+                      <li>Inquire about services offered</li>
+                      <li>Request directions to the practice</li>
+                      <li>Ask about insurance acceptance</li>
                     </ol>
                   </div>
                 </div>
@@ -218,36 +167,32 @@ export default function DemoGuide() {
             <Card>
               <CardHeader>
                 <CardTitle>Common Issues & Solutions</CardTitle>
-                <CardDescription>
-                  Help with frequent demo challenges
-                </CardDescription>
+                <CardDescription>Help with frequent challenges</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="border-b pb-4">
                     <h3 className="font-semibold mb-2">
-                      Authentication Failed
+                      Authentication Issues
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Make sure to use the exact name and date of birth from the
-                      patient profiles. The AI is sensitive to precise matching.
+                      Speak clearly and provide your full name and date of birth
+                      exactly as they appear in your patient records. It may
+                      also ask for the lst 4 digits of your patients SSN.
                     </p>
                   </div>
                   <div className="border-b pb-4">
-                    <h3 className="font-semibold mb-2">
-                      Dashboard Not Updating
-                    </h3>
+                    <h3 className="font-semibold mb-2">Communication Tips</h3>
                     <p className="text-sm text-muted-foreground">
-                      Try refreshing your browser. Changes should appear within
-                      30 seconds.
+                      Speak naturally and provide complete information. The AI
+                      works best with clear, conversational speech.
                     </p>
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-2">AI Not Understanding</h3>
+                    <h3 className="font-semibold mb-2">Connection Problems</h3>
                     <p className="text-sm text-muted-foreground">
-                      Speak clearly and provide information in a natural,
-                      conversational way. The AI works best with complete
-                      sentences.
+                      If the AI seems unresponsive, it may be thinking. Wait a
+                      few seconds before speaking again.
                     </p>
                   </div>
                 </div>
@@ -258,7 +203,7 @@ export default function DemoGuide() {
 
         <div className="mt-12 text-center">
           <p className="text-sm text-muted-foreground">
-            Need more help? Contact our support team at support@getaxon.ai
+            Need help? Contact our support team at support@getaxon.ai
           </p>
         </div>
       </main>

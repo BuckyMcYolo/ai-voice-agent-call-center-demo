@@ -12,7 +12,7 @@ const Page = async () => {
   })
 
   if (session) {
-    redirect("/")
+    redirect("/appointments")
   }
 
   return (

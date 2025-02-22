@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+  ArrowRight,
   Calendar,
   CircleHelp,
   Home,
@@ -26,6 +27,7 @@ import { FaGithub } from "react-icons/fa"
 import { BsTwitterX } from "react-icons/bs"
 import { FaMeta } from "react-icons/fa6"
 import { FaLinkedin } from "react-icons/fa"
+import Link from "next/link"
 
 const AppSideBar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const pathname = usePathname()
@@ -99,20 +101,41 @@ const AppSideBar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         <NavMain items={data.navMain} />
 
         <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <div className="w-full p-2">
+          <Button
+            className="w-full group/access"
+            endIcon={
+              <ArrowRight
+                size={20}
+                className="group-hover/access:translate-x-1 transition-transform"
+              />
+            }
+          >
+            Get Access
+          </Button>
+        </div>
         <Separator />
         <div className="flex justify-center gap-2 pb-1">
-          <Button size={"icon"} variant={"ghost"}>
-            <FaLinkedin size={20} />
-          </Button>
-          <Button size={"icon"} variant={"ghost"}>
-            <BsTwitterX size={20} />
-          </Button>
-          <Button size={"icon"} variant={"ghost"}>
-            <FaMeta size={20} />
-          </Button>
-          <Button size={"icon"} variant={"ghost"}>
-            <FaGithub size={20} />
-          </Button>
+          <Link href="https://www.linkedin.com/company/axon-ai-page">
+            <Button size={"icon"} variant={"ghost"}>
+              <FaLinkedin size={20} />
+            </Button>
+          </Link>
+          <Link href="https://x.com/AxonAILabs">
+            <Button size={"icon"} variant={"ghost"}>
+              <BsTwitterX size={20} />
+            </Button>
+          </Link>
+          <Link href="/">
+            <Button size={"icon"} variant={"ghost"}>
+              <FaMeta size={20} />
+            </Button>
+          </Link>
+          <Link href="https://github.com/BuckyMcYolo/ai-voice-agent-call-center-demo">
+            <Button size={"icon"} variant={"ghost"}>
+              <FaGithub size={20} />
+            </Button>
+          </Link>
         </div>
       </SidebarContent>
       <SidebarRail />

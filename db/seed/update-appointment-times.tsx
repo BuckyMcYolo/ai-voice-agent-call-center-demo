@@ -109,4 +109,12 @@ export async function updateAppointmentsForUser(userId: string) {
       }
     }
   }
+
+  // Update the user's hasUpdatedAppointments flag
+  await db
+    .update(schema.user)
+    .set({
+      hasUpdatedAppointments: true,
+    })
+    .where(eq(schema.user.id, userId))
 }
