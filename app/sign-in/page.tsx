@@ -19,8 +19,8 @@ const Page = async () => {
     <Dialog open={true}>
       <DialogContent hideCloseIcon>
         <DialogTitle className="flex items-center gap-2">
-          <Phone className="text-brand h-4 w-4" />
-          Sign in to Call Demo
+          {/* <Phone className="text-brand h-4 w-4" /> */}
+          {/* Sign in to Call Demo */}
         </DialogTitle>
         <SignInGoogle />
       </DialogContent>

@@ -1,7 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 import { MoveLeft } from "lucide-react"
@@ -12,6 +18,13 @@ export default function SignInGoogle() {
   const [loading, setLoading] = useState(false)
   return (
     <Card className="max-w-md border-0">
+      <CardHeader>
+        <CardTitle>Sign in to Call Center Demo</CardTitle>
+        <CardDescription>
+          When you first sign in, we&apos;ll create some sample patients and
+          appointments for you to see how the app works.
+        </CardDescription>
+      </CardHeader>
       <CardContent className="p-4">
         <div className="grid gap-4">
           <div
