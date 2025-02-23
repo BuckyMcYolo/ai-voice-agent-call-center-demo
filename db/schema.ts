@@ -175,6 +175,17 @@ export const patientAllergy = pgTable("patient_allergy", {
   diagnosedDate: date("diagnosed_date"),
 })
 
+export const patientAllergyRelations = relations(
+  patientAllergy,
+  ({ one, many }) => ({
+    patient: one(patient, {
+      fields: [patientAllergy.patientId],
+      references: [patient.id],
+      relationName: "patient",
+    }),
+  })
+)
+
 export const medication = pgTable("medication", {
   id: uuid("id").primaryKey().defaultRandom().notNull(),
   patientId: uuid("patient_id")
@@ -188,6 +199,14 @@ export const medication = pgTable("medication", {
   active: boolean("active").notNull().default(true),
   prescribingDoctor: text("prescribing_doctor"),
 })
+
+export const medicationRelations = relations(medication, ({ one, many }) => ({
+  patient: one(patient, {
+    fields: [medication.patientId],
+    references: [patient.id],
+    relationName: "patient",
+  }),
+}))
 
 export const conditionEnum = pgEnum("condition_status", [
   "active",
@@ -206,3 +225,14 @@ export const medicalHistory = pgTable("medical_history", {
   resolvedDate: date("resolved_date"),
   notes: text("notes"),
 })
+
+export const medicalHistoryRelations = relations(
+  medicalHistory,
+  ({ one, many }) => ({
+    patient: one(patient, {
+      fields: [medicalHistory.patientId],
+      references: [patient.id],
+      relationName: "patient",
+    }),
+  })
+)
