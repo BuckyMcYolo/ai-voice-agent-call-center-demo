@@ -31,22 +31,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { usePathname, useRouter } from "next/navigation"
 import React from "react"
 import { Alert } from "@/components/ui/alert"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-
-const formSchema = z.object({
-  practiceName: z
-    .string()
-    .min(2, "Practice name must be at least 2 characters"),
-  role: z.string().min(2, "Role must be at least 2 characters"),
-  practiceSize: z.enum(["1-5", "6-15", "16-50", "50+"]),
-  callVolume: z.enum(["100-500", "501-2000", "2000+", "3000+"]),
-  timeline: z.enum(["1-2 weeks", "1-3", "3-6", "6+"]),
-  message: z.string().optional(),
-})
-
-type FormValues = z.infer<typeof formSchema>
 
 const UserAvatar = React.memo(({ user }: { user: any }) => {
   const getInitials = React.useCallback((name: string) => {
@@ -77,15 +61,6 @@ const Nav = ({ children }: { children: React.ReactNode }) => {
 
   const router = useRouter()
   const pathname = usePathname()
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      practiceName: "",
-      role: "",
-      message: "",
-    },
-  })
 
   return (
     <SidebarProvider>
