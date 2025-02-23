@@ -71,7 +71,7 @@ export default function DemoGuide() {
                         DOB].&quot;
                       </p>
                       <p className="text-sm text-muted-foreground mt-2">
-                        Use your actual information for authentication
+                        Use your actual patient information for authentication
                       </p>
                     </div>
                   </div>
