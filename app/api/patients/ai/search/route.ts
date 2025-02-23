@@ -94,6 +94,9 @@ export async function GET(req: Request) {
           // where: not(eq(appointment.status, "cancelled")),
           orderBy: [asc(appointment.date), asc(appointment.startTime)],
         },
+        medicalHistory: true,
+        allergies: true,
+        medications: true,
       },
     })
 
