@@ -3,6 +3,12 @@ import db from ".."
 import * as schema from "@/db/schema"
 import moment from "moment"
 import { updateAppointmentsForUser } from "./update-appointment-times"
+import {
+  validMedicationSets,
+  validAllergySets,
+  validConditionSets,
+} from "./medical-profiles"
+import { updateMedicalHistoriesForUser } from "./update-patient-data"
 
 export async function seedUserData({
   user,
@@ -22,6 +28,9 @@ export async function seedUserData({
     {
       patient: schema.patient,
       appointment: schema.appointment,
+      medication: schema.medication,
+      allergy: schema.patientAllergy,
+      medicalCondition: schema.medicalHistory,
     },
     { seed: new Date().getTime() }
   ).refine((f) => ({
@@ -252,6 +261,21 @@ export async function seedUserData({
           { weight: 0.4, count: [2] }, // 40% chance of 2 appointments
           { weight: 0.1, count: [3] }, // 10% chance of 3 appointments
         ],
+        medication: [
+          { weight: 0.3, count: [1, 2] }, // 30% chance of 1-2 medications
+          { weight: 0.5, count: [3, 4] }, // 50% chance of 3-4 medications
+          { weight: 0.2, count: [5] }, // 20% chance of 5 medications
+        ],
+        allergy: [
+          { weight: 0.6, count: [1] }, // 60% chance of 1 allergy
+          { weight: 0.3, count: [2] }, // 30% chance of 2 allergies
+          { weight: 0.1, count: [3] }, // 10% chance of 3 allergies
+        ],
+        medicalCondition: [
+          { weight: 0.4, count: [1, 2] }, // 40% chance of 1-2 conditions
+          { weight: 0.4, count: [3, 4] }, // 40% chance of 3-4 conditions
+          { weight: 0.2, count: [5] }, // 20% chance of 5 conditions
+        ],
       },
     },
 
@@ -282,9 +306,60 @@ export async function seedUserData({
         }),
       },
     },
+    medication: {
+      columns: {
+        id: f.uuid(),
+        name: f.valuesFromArray({ values: validMedicationSets.names }),
+        dosage: f.valuesFromArray({ values: validMedicationSets.dosages }),
+        frequency: f.valuesFromArray({
+          values: validMedicationSets.frequencies,
+        }),
+        prescribedDate: f.date({
+          minDate: "2023-01-01",
+          maxDate: moment().format("YYYY-MM-DD"),
+        }),
+        active: f.boolean(),
+        prescribingDoctor: f.valuesFromArray({
+          values: [
+            "Dr. Smith",
+            "Dr. Johnson",
+            "Dr. Williams",
+            "Dr. Davis",
+            "Dr. Miller",
+          ],
+        }),
+      },
+    },
+    allergy: {
+      columns: {
+        id: f.uuid(),
+        allergen: f.valuesFromArray({ values: validAllergySets.allergens }),
+        severity: f.valuesFromArray({ values: ["mild", "moderate", "severe"] }),
+        reaction: f.valuesFromArray({ values: validAllergySets.reactions }),
+        diagnosedDate: f.date({
+          minDate: "2020-01-01",
+          maxDate: moment().format("YYYY-MM-DD"),
+        }),
+      },
+    },
+    medicalCondition: {
+      columns: {
+        id: f.uuid(),
+        condition: f.valuesFromArray({ values: validConditionSets.conditions }),
+        status: f.valuesFromArray({
+          values: ["active", "resolved", "chronic"],
+        }),
+        diagnosedDate: f.date({
+          minDate: "2015-01-01",
+          maxDate: moment().format("YYYY-MM-DD"),
+        }),
+        notes: f.valuesFromArray({ values: validConditionSets.notes }),
+      },
+    },
   }))
   // Once seeding is complete, update appointments for this user.
   await updateAppointmentsForUser(user.id)
+  await updateMedicalHistoriesForUser(user.id)
 }
 
 // Define 50 possible note strings.
@@ -339,4 +414,61 @@ const appointmentNotes = [
   "Referral from Dr. Edwards for respiratory exam, $30 ded owed.",
   "$0 owed, referred for endocrine evaluation from NP Miller.",
   "Referred from Dr. Foster for routine checkup, $20 ded owed (Aetna).",
+]
+
+const medications = [
+  { name: "Lisinopril", dosage: "10mg", frequency: "daily" },
+  { name: "Metformin", dosage: "500mg", frequency: "twice daily" },
+  { name: "Atorvastatin", dosage: "20mg", frequency: "daily" },
+  { name: "Levothyroxine", dosage: "50mcg", frequency: "daily" },
+  { name: "Amlodipine", dosage: "5mg", frequency: "daily" },
+  { name: "Metoprolol", dosage: "25mg", frequency: "twice daily" },
+  { name: "Omeprazole", dosage: "20mg", frequency: "daily" },
+  { name: "Gabapentin", dosage: "300mg", frequency: "three times daily" },
+  { name: "Sertraline", dosage: "50mg", frequency: "daily" },
+  { name: "Furosemide", dosage: "40mg", frequency: "daily" },
+  { name: "Pantoprazole", dosage: "40mg", frequency: "daily" },
+  { name: "Escitalopram", dosage: "10mg", frequency: "daily" },
+  { name: "Losartan", dosage: "50mg", frequency: "daily" },
+  { name: "Duloxetine", dosage: "30mg", frequency: "daily" },
+  { name: "Carvedilol", dosage: "12.5mg", frequency: "twice daily" },
+]
+
+const allergies = [
+  { allergen: "Penicillin", reaction: "Hives and difficulty breathing" },
+  { allergen: "Sulfa Drugs", reaction: "Skin rash" },
+  { allergen: "Latex", reaction: "Contact dermatitis" },
+  { allergen: "Peanuts", reaction: "Anaphylaxis" },
+  { allergen: "Shellfish", reaction: "Swelling and hives" },
+  { allergen: "Ibuprofen", reaction: "Stomach upset and rash" },
+  { allergen: "Aspirin", reaction: "Respiratory difficulties" },
+  { allergen: "Dairy", reaction: "Digestive issues" },
+  { allergen: "Eggs", reaction: "Skin reactions" },
+  { allergen: "Codeine", reaction: "Nausea and dizziness" },
+  { allergen: "Tetracycline", reaction: "Severe skin reaction" },
+  { allergen: "Tree Nuts", reaction: "Throat swelling" },
+  { allergen: "Soy", reaction: "Gastrointestinal distress" },
+  { allergen: "Contrast Dye", reaction: "Itching and flushing" },
+  { allergen: "Morphine", reaction: "Severe itching and hives" },
+]
+
+const medicalConditions = [
+  { condition: "Hypertension", notes: "Well controlled with medication" },
+  { condition: "Type 2 Diabetes", notes: "Diet controlled, A1C stable" },
+  { condition: "Asthma", notes: "Mild intermittent, requires inhaler" },
+  { condition: "Osteoarthritis", notes: "Affecting knees bilaterally" },
+  { condition: "Depression", notes: "Managed with medication and therapy" },
+  { condition: "GERD", notes: "Controlled with daily PPI" },
+  { condition: "Migraine", notes: "3-4 episodes per month" },
+  { condition: "Hypothyroidism", notes: "Stable on current dose" },
+  { condition: "Obesity", notes: "BMI 32, on weight management program" },
+  { condition: "Anxiety", notes: "Mild, managed with PRN medication" },
+  {
+    condition: "Atrial Fibrillation",
+    notes: "Rate controlled, on anticoagulation",
+  },
+  { condition: "Sleep Apnea", notes: "Using CPAP nightly" },
+  { condition: "Chronic Kidney Disease", notes: "Stage 2, stable" },
+  { condition: "Osteoporosis", notes: "T-score -2.6, on bisphosphonate" },
+  { condition: "Glaucoma", notes: "Controlled with eye drops" },
 ]

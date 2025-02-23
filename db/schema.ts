@@ -19,7 +19,9 @@ export const user = pgTable("user", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
   // do not show appointments till they have been updated
-  hasUpdatedAppointments: boolean("has_updated_appointments").notNull(),
+  hasUpdatedAppointments: boolean("has_updated_appointments")
+    .notNull()
+    .default(false),
 })
 
 export type InsertUser = typeof user.$inferInsert
@@ -118,6 +120,9 @@ export const patientRelations = relations(patient, ({ one, many }) => ({
     relationName: "user",
   }),
   appointments: many(appointment),
+  allergies: many(patientAllergy),
+  medications: many(medication),
+  medicalHistory: many(medicalHistory),
 }))
 
 export const statusEnum = pgEnum("status", [
@@ -151,3 +156,53 @@ export const appointmentRelations = relations(appointment, ({ one, many }) => ({
     relationName: "patient",
   }),
 }))
+
+//adding allergies, medications, and conditions to the patient table
+export const allergyEnum = pgEnum("allergy_severity", [
+  "mild",
+  "moderate",
+  "severe",
+])
+
+export const patientAllergy = pgTable("patient_allergy", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  patientId: uuid("patient_id")
+    .notNull()
+    .references(() => patient.id),
+  allergen: text("allergen").notNull(),
+  severity: allergyEnum("severity").notNull(),
+  reaction: text("reaction").notNull(),
+  diagnosedDate: date("diagnosed_date"),
+})
+
+export const medication = pgTable("medication", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  patientId: uuid("patient_id")
+    .notNull()
+    .references(() => patient.id),
+  name: text("name").notNull(),
+  dosage: text("dosage").notNull(),
+  frequency: text("frequency").notNull(),
+  prescribedDate: date("prescribed_date"),
+  endDate: date("end_date"),
+  active: boolean("active").notNull().default(true),
+  prescribingDoctor: text("prescribing_doctor"),
+})
+
+export const conditionEnum = pgEnum("condition_status", [
+  "active",
+  "resolved",
+  "chronic",
+])
+
+export const medicalHistory = pgTable("medical_history", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  patientId: uuid("patient_id")
+    .notNull()
+    .references(() => patient.id),
+  condition: text("condition").notNull(),
+  status: conditionEnum("status").notNull(),
+  diagnosedDate: date("diagnosed_date"),
+  resolvedDate: date("resolved_date"),
+  notes: text("notes"),
+})
