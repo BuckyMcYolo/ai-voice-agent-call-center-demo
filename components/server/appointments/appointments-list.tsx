@@ -5,6 +5,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -12,13 +13,16 @@ import {
 import { CardContent } from "@/components/ui/card"
 import { Calendar, Clock } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import moment from "moment"
+import moment from "moment-timezone"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+
+// using explicit timezone to avoid issues with server components
+const TIMEZONE = "America/Chicago"
 
 const AppointmentsList = async ({
   session,
@@ -53,7 +57,7 @@ const AppointmentsList = async ({
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Calendar size={14} />
-                    {moment(appointment.date).format("MM-DD-YYYY")}
+                    {moment.tz(appointment.date, TIMEZONE).format("MM-DD-YYYY")}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -73,14 +77,18 @@ const AppointmentsList = async ({
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Clock size={14} />
-                    {new Date(appointment.startTime).toLocaleTimeString()}
+                    {moment
+                      .tz(appointment.startTime, TIMEZONE)
+                      .format("hh:mm A")}{" "}
                     {/* calculate length  */}
                     <span className="text-xs text-muted-foreground">
                       (
-                      {moment(appointment.endTime).diff(
-                        moment(appointment.startTime),
-                        "minutes"
-                      )}{" "}
+                      {moment
+                        .tz(appointment.endTime, TIMEZONE)
+                        .diff(
+                          moment.tz(appointment.startTime, TIMEZONE),
+                          "minutes"
+                        )}{" "}
                       min)
                     </span>
                   </div>
@@ -94,9 +102,17 @@ const AppointmentsList = async ({
                   </div>
                 </TableCell>
                 <TableCell>
-                  {moment(appointment.patient.dateOfBirth).format("MM-DD-YYYY")}{" "}
+                  {moment
+                    .tz(appointment.patient.dateOfBirth, TIMEZONE)
+                    .format("MM-DD-YYYY")}{" "}
                   <span className="text-xs text-muted-foreground">
-                    ({moment().diff(appointment.patient.dateOfBirth, "years")}{" "}
+                    (
+                    {moment
+                      .tz(new Date(), TIMEZONE)
+                      .diff(
+                        moment.tz(appointment.patient.dateOfBirth, TIMEZONE),
+                        "years"
+                      )}{" "}
                     yo)
                   </span>
                 </TableCell>

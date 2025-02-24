@@ -10,6 +10,7 @@ function getRandomIntInclusive(min: number, max: number): number {
 
 // Custom function to update appointment times for a user's patients
 export async function updateAppointmentsForUser(userId: string) {
+  // Define the timezone as Central Time (handles CST/CDT as needed)
   const TIMEZONE = "America/Chicago"
 
   // Get all patients for the given user
@@ -30,9 +31,10 @@ export async function updateAppointmentsForUser(userId: string) {
       const durations = [15, 30, 60]
       const duration = durations[Math.floor(Math.random() * durations.length)]
 
-      // Parse the appointment's seeded date in CST
+      // Parse the appointment's seeded date in Central Time
       const appointmentDate = moment.tz(appointment.date, TIMEZONE)
 
+      // Define the allowed time window: 8:00 AM to 5:00 PM
       // Earliest start: 8:00 AM CST on the appointment's date
       const earliestStart = appointmentDate
         .clone()
@@ -54,7 +56,7 @@ export async function updateAppointmentsForUser(userId: string) {
       const possibleStartTimes: moment.Moment[] = []
       const currentTime = earliestStart.clone()
 
-      // Ensure the first time is on a half-hour (0 or 30 minutes)
+      // If currentTime is not on a half-hour mark, adjust it.
       if (currentTime.minute() % 30 !== 0) {
         currentTime.minute(currentTime.minute() < 30 ? 30 : 0)
         if (currentTime.minute() === 0) currentTime.add(1, "hour")
@@ -62,7 +64,7 @@ export async function updateAppointmentsForUser(userId: string) {
 
       // Build the list: iterate in 30-minute steps until latestStart
       while (currentTime.isSameOrBefore(latestStart)) {
-        // Verify the end time would still be before 5 PM
+        // Check that the appointment will end by 5:00 PM (or exactly at 5:00 PM)
         const potentialEndTime = currentTime.clone().add(duration, "minutes")
         if (
           potentialEndTime.hour() < 17 ||
@@ -81,12 +83,11 @@ export async function updateAppointmentsForUser(userId: string) {
             ]
           : null
 
-      // Only update if we found a valid time slot
+      // Only update if a valid time slot was found
       if (chosenStartTime) {
         const newStartTime = chosenStartTime
         const newEndTime = newStartTime.clone().add(duration, "minutes")
 
-        // Log the times for verification
         console.log("Updating appointment:", {
           date: appointmentDate.format("YYYY-MM-DD"),
           start: newStartTime.format("HH:mm"),
@@ -94,7 +95,7 @@ export async function updateAppointmentsForUser(userId: string) {
           timezone: TIMEZONE,
         })
 
-        // Store times in the database (they'll be converted to UTC)
+        // Store the new times (they will be converted to UTC in the database)
         await db
           .update(schema.appointment)
           .set({
